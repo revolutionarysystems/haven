@@ -1,0 +1,18 @@
+{
+	"path": "haven_artifacts",
+	"transient_scopes": ["main"],
+	"defaults": {
+		"scope": "main",
+		"maven_group": "org.webjars"
+	},
+	"local_cache": "/var/cache/haven/",
+	"repositories": {
+		"dependencies": [
+			{
+				"url": "http://repo1.maven.org/maven2",
+				"type": "maven"
+			}
+		],
+		"distribution": []
+	}
+}

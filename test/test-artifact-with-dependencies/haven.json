@@ -1,0 +1,10 @@
+{
+	"name": "haven-test-artifact-with-dependencies",
+	"version": "0.1.0",
+	"dependencies": [
+		{
+			"name": "haven-test-artifact-1",
+			"version": "0.1.0"
+		}
+	]
+}

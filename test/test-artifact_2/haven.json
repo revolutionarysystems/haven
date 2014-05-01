@@ -1,0 +1,16 @@
+{
+	"name": "haven-test-artifact-2",
+	"version": "0.1.0",
+	"artifacts": [
+		{
+			"files": [
+				"test.txt"
+			]
+		},{
+			"id": "other",
+			"files": [
+				"test2.txt"
+			]
+		}
+	]
+}

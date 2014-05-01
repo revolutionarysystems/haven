@@ -1,0 +1,18 @@
+{
+	"name": "haven-test-artifact-with-haven-dependencies",
+	"version": "0.1.0",
+	"dependencies": [
+		{
+			"name": "haven-test-artifact-3",
+			"version": "0.1.0"
+		}
+	],
+	"repositories": {
+		"dependencies": [
+			{
+				"url": "http://localhost:8080/haven-repository",
+				"type": "haven"
+			}
+		]
+	}
+}

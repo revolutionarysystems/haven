@@ -1,0 +1,19 @@
+{
+	"name": "haven-test-artifact-1",
+	"version": "0.1.0",
+	"artifacts": [{
+			"files": [
+				"test.txt",
+				{"other.txt": "test2.txt"},
+				"directory",
+				{"directory/another.txt": "directory.txt"}
+			]}
+	],
+	"repositories": {
+		"distribution": [
+			{
+				"url": "http://localhost:8080/haven-repository"
+			}
+		]
+	}
+}

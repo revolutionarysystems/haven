@@ -1,0 +1,20 @@
+{
+	"name": "haven-test-artifact-with-test-dependencies",
+	"version": "0.1.0",
+	"artifacts": [
+		{
+			"files": ["test.txt"]
+		}
+	],
+	"dependencies": [
+		{
+			"name": "haven-test-artifact-2",
+			"version": "0.1.0"
+		},
+		{
+			"name": "haven-test-artifact-2-other",
+			"version": "0.1.0",
+			"scope": "test"
+		}
+	]
+}

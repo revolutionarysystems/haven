@@ -1,0 +1,11 @@
+{
+	"name": "haven-test-artifact-with-maven-dependencies",
+	"version": "0.1.0",
+	"dependencies": [
+		{
+			"name": "jquery",
+			"version": "2.1.0-2",
+			"includes":["jquery.js"]
+		}
+	]
+}
