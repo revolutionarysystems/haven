@@ -78,6 +78,7 @@ exports.haven = new function() {
 
 	this.deploy = function(callback) {
 		console.log("deploy");
+		this.install();
 		var packageConfig = loadPackageConfig();
 		var packageName = packageConfig.name;
 		var packageVersion = packageConfig.version;
@@ -118,8 +119,9 @@ exports.haven = new function() {
 	}
 
 	this.update = function(callback) {
+		this.clean();
 		var packageConfig = loadPackageConfig();
-		loadDependencies(packageConfig.dependencies, false, callback);
+		loadDependencies(packageConfig.dependencies, false, null, callback);
 	}
 
 	this.clean = function() {
@@ -163,7 +165,7 @@ exports.haven = new function() {
 		}
 	}
 
-	function loadDependencies(dependencies, transient, callback) {
+	function loadDependencies(dependencies, transient, parentScope, callback) {
 		if (dependencies != null) {
 			async.eachSeries(dependencies, function(dependency, callback) {
 				var havenConfig = loadHavenConfig();
@@ -174,6 +176,9 @@ exports.haven = new function() {
 					dependencyScope = havenConfig.defaults.scope;
 				}
 				if (!transient || havenConfig.transient_scopes.indexOf(dependencyScope) > -1) {
+					if(parentScope != null){
+						dependencyScope = parentScope;
+					}
 					loadArtifact(dependencyName, dependencyVersion, dependencyScope, dependency.includes, dependency.excludes, callback);
 				} else {
 					callback();
@@ -252,7 +257,7 @@ exports.haven = new function() {
 		}
 		async.series([
 			function(callback) {
-				loadDependencies(artifactConfig.dependencies, true, callback);
+				loadDependencies(artifactConfig.dependencies, true, scope, callback);
 			},
 			function(callback) {
 				var localCacheArtifactDir = localCacheVersionDir + "/artifact";
