@@ -12,7 +12,7 @@
 	"repositories": {
 		"distribution": [
 			{
-				"url": "http://localhost:8080/haven-repository"
+				"url": "http://build.revsys.co.uk/haven-repository"
 			}
 		]
 	}

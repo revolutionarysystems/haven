@@ -16,20 +16,20 @@ exports.haven = new function() {
 	}
 
 	this.run = function(method, args) {
+        var callback = function(err) {
+            if (err != null) {
+                console.log(err.message);
+            }
+        };
 		if (method === "install") {
 			this.install();
 		} else if (method === "deploy") {
-			this.deploy(function(err) {
-				if (err != null) {
-					console.log(err.message);
-				}
-			});
+            this.install();
+			this.deploy(callback);
+		} else if (method === "deployOnly") {
+			this.deploy(callback);
 		} else if (method === "update") {
-			this.update(function(err) {
-				if (err != null) {
-					console.log(err.message);
-				}
-			});
+			this.update(callback);
 		} else if (method === "clean") {
 			this.clean();
 		} else if (method === "clean-cache") {
@@ -77,8 +77,6 @@ exports.haven = new function() {
 	}
 
 	this.deploy = function(callback) {
-		console.log("deploy");
-		this.install();
 		var packageConfig = loadPackageConfig();
 		var packageName = packageConfig.name;
 		var packageVersion = packageConfig.version;
@@ -282,16 +280,21 @@ exports.haven = new function() {
 		if (fs.statSync(srcFile).isDirectory()) {
 			var files = fs.readdirSync(srcFile);
 			async.eachSeries(files, function(fileName, callback) {
-				mkdirsIfNecessary([targetDir + "/" + file]);
+				mkdirsIfNecessary([targetDir + targetPath + "/" + file]);
 				loadLocalArtifactFile(srcDir, srcPath, fileName, targetDir, targetPath + "/" + file, includes, excludes, callback);
 			}, callback);
 		} else {
 			srcPath = srcPath.substring(1);
 			if ((includes == null || includes.indexOf(srcPath) > -1) && (excludes == null || excludes.indexOf(srcPath) == -1)) {
 				console.log("Storing " + srcPath + " to " + targetDir + "/" + targetPath);
-				fs.readFile(srcFile, function(err, data) {
-					fs.writeFile(targetDir + "/" + targetPath + "/" + file, data, callback);
-				});
+				//fs.readFile(srcFile, function(err, data) {
+                //    console.log("readFile");
+                //    console.log(err);
+                //    console.log(data);
+				//	fs.writeFile(targetDir + "/" + targetPath + "/" + file, data, callback);
+				//});
+                fs.writeFileSync(targetDir + "/" + targetPath + "/" + file, fs.readFileSync(srcFile));
+                callback();
 			} else {
 				callback();
 			}

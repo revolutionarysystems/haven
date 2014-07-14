@@ -2,11 +2,11 @@
   "author": "Adam Knight",
   "name": "haven",
   "description": "Browser Package Manager",
-  "version": "0.4.0",
+  "version": "0.4.4",
   "repository": {
     "url": ""
   },
-  "main": "./lib/haven",
+  "main": "index",
   "keywords": [
     "haven",
     "package",
