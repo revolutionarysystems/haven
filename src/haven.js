@@ -15,12 +15,14 @@ exports.haven = new function() {
 		return loadHavenConfig();
 	}
 
-	this.run = function(method, args) {
-        var callback = function(err) {
-            if (err != null) {
-                console.log(err.message);
-            }
-        };
+	this.run = function(method, callback) {
+        if(callback == null){
+            callback = function(err) {
+                if (err != null) {
+                    console.log(err.message);
+                }
+            };
+        }
 		if (method === "install") {
 			this.install();
 		} else if (method === "deploy") {
@@ -305,7 +307,6 @@ exports.haven = new function() {
 		console.log("Loading haven artifact");
 		var repoVersionDirUrl = url + "/" + name + "/" + version;
 		var configUrl = repoVersionDirUrl + "/haven.json";
-		console.log(configUrl);
 		var artifactUrl = repoVersionDirUrl + "/artifact/";
 		var localCache = loadHavenConfig().local_cache;
 		var localCachePackageDir = localCache + "/" + name;
@@ -331,8 +332,8 @@ exports.haven = new function() {
 					loadLocalArtifact(loadHavenConfig().local_cache, name, version, scope, includes, excludes, callback);
 				});
 			}
-		], function() {
-			callback();
+		], function(err) {
+			callback(err);
 		});
 	}
 
