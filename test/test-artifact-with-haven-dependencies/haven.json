@@ -10,7 +10,7 @@
 	"repositories": {
 		"dependencies": [
 			{
-				"url": "http://build.revsys.co.uk/haven-repository"
+				"url": "http://build.revsys.co.uk/haven-repository",
 				"type": "haven"
 			}
 		]

@@ -2,3 +2,7 @@
 /test-target
 
 /sublime
+/node_modules
+/test/test-artifact-with-haven-dependencies/haven_artifacts
+/test/test-artifact-with-transient-dependencies/haven_artifacts
+/test/test-artifact-with-bower-dependencies/haven_artifacts

@@ -1,0 +1,36 @@
+{
+	"name": "echo-central-dashboard",
+	"version": "0.1.0-SNAPSHOT",
+	"artifacts": [{
+			"files": [{
+				"dist": "."
+			}]}
+	],
+	"repositories": {
+		"distribution": [
+			{
+				"url": "http://internal.echo-central.com/haven-repository"
+			}
+		],
+        "dependencies": [
+        	{
+                "type": "haven",
+                "url": "http://build.revsys.co.uk/haven-repository"
+            },{
+                "type": "haven",
+                "url": "http://internal.echo-central.com/haven-repository"
+            }
+        ]
+	},
+    "dependencies": [
+    		{
+                "name": "blocks",
+                "version": "0.1.0-SNAPSHOT",
+                "scope": "pages"
+            },{
+                "name": "echo-central-blocks",
+                "version": "0.1.0-SNAPSHOT",
+                "scope": "blocks"
+            }
+    ]
+}

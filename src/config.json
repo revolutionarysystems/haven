@@ -11,6 +11,9 @@
 			{
 				"url": "http://repo1.maven.org/maven2",
 				"type": "maven"
+			},{
+				"url": "https://bower.herokuapp.com/packages",
+				"type": "bower"
 			}
 		],
 		"distribution": []

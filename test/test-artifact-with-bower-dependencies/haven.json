@@ -1,0 +1,10 @@
+{
+	"name": "haven-test-artifact-with-bower-dependencies",
+	"version": "0.1.0",
+	"dependencies": [
+		{
+			"name": "angular-loading-bar",
+			"version": "0.5.0"
+		}
+	]
+}

@@ -4,6 +4,10 @@ var request = require('request');
 var async = require('async');
 var AdmZip = require('adm-zip');
 var parser = require('xml2js');
+var BowerClient = require('bower-registry-client');
+var bower = new BowerClient({});
+var gh = require('github-url-to-object')
+var ghdownload = require('download-github-repo')
 
 exports.haven = new function() {
 
@@ -16,17 +20,17 @@ exports.haven = new function() {
 	}
 
 	this.run = function(method, callback) {
-        if(callback == null){
-            callback = function(err) {
-                if (err != null) {
-                    console.log(err.message);
-                }
-            };
-        }
+		if (callback == null) {
+			callback = function(err) {
+				if (err != null) {
+					console.log(err.message);
+				}
+			};
+		}
 		if (method === "install") {
 			this.install();
 		} else if (method === "deploy") {
-            this.install();
+			this.install();
 			this.deploy(callback);
 		} else if (method === "deployOnly") {
 			this.deploy(callback);
@@ -176,7 +180,7 @@ exports.haven = new function() {
 					dependencyScope = havenConfig.defaults.scope;
 				}
 				if (!transient || havenConfig.transient_scopes.indexOf(dependencyScope) > -1) {
-					if(parentScope != null){
+					if (parentScope != null) {
 						dependencyScope = parentScope;
 					}
 					loadArtifact(dependencyName, dependencyVersion, dependencyScope, dependency.includes, dependency.excludes, callback);
@@ -225,6 +229,8 @@ exports.haven = new function() {
 						loadMavenArtifact(repository.url, name, version, scope, includes, excludes, loadedCallback);
 					} else if (repository.type === "haven") {
 						loadHavenArtifact(repository.url, name, version, scope, includes, excludes, loadedCallback);
+					} else if (repository.type === "bower") {
+						loadBowerArtifact(repository.url, name, version, scope, includes, excludes, loadedCallback);
 					} else {
 						console.log("Unknown repository type: " + repository.type);
 						callback();
@@ -256,6 +262,7 @@ exports.haven = new function() {
 			return;
 		}
 		async.series([
+
 			function(callback) {
 				loadDependencies(artifactConfig.dependencies, true, scope, callback);
 			},
@@ -290,13 +297,13 @@ exports.haven = new function() {
 			if ((includes == null || includes.indexOf(srcPath) > -1) && (excludes == null || excludes.indexOf(srcPath) == -1)) {
 				console.log("Storing " + srcPath + " to " + targetDir + "/" + targetPath);
 				//fs.readFile(srcFile, function(err, data) {
-                //    console.log("readFile");
-                //    console.log(err);
-                //    console.log(data);
+				//    console.log("readFile");
+				//    console.log(err);
+				//    console.log(data);
 				//	fs.writeFile(targetDir + "/" + targetPath + "/" + file, data, callback);
 				//});
-                fs.writeFileSync(targetDir + "/" + targetPath + "/" + file, fs.readFileSync(srcFile));
-                callback();
+				fs.writeFileSync(targetDir + "/" + targetPath + "/" + file, fs.readFileSync(srcFile));
+				callback();
 			} else {
 				callback();
 			}
@@ -313,6 +320,7 @@ exports.haven = new function() {
 		var localCacheVersionDir = localCachePackageDir + "/" + version;
 		var localCacheArtifactDir = localCacheVersionDir + "/artifact";
 		async.waterfall([
+
 			function(callback) {
 				var req = request(configUrl);
 				req.on("response", function(resp) {
@@ -327,7 +335,8 @@ exports.haven = new function() {
 						returnDependencyNotFoundError(name, version, callback);
 					}
 				});
-			}, function(callback) {
+			},
+			function(callback) {
 				downloadHavenArtifactDirectory(artifactUrl, localCacheArtifactDir, function() {
 					loadLocalArtifact(loadHavenConfig().local_cache, name, version, scope, includes, excludes, callback);
 				});
@@ -342,6 +351,7 @@ exports.haven = new function() {
 			if (resp.statusCode === 200) {
 				var artifacts = JSON.parse(body);
 				async.waterfall([
+
 					function(callback) {
 						async.eachSeries(artifacts.resources, function(artifact, callback) {
 							console.log("Downloading " + artifact.name);
@@ -352,7 +362,8 @@ exports.haven = new function() {
 						}, function(err) {
 							callback(err);
 						});
-					}, function(callback) {
+					},
+					function(callback) {
 						async.eachSeries(artifacts.directories, function(directory, callback) {
 							mkdirsIfNecessary([targetDir + "/" + directory.name]);
 							downloadHavenArtifactDirectory(directoryUrl + directory.name + "/", targetDir + "/" + directory.name, callback);
@@ -380,6 +391,7 @@ exports.haven = new function() {
 		var localCacheArtifactDir = localCacheVersionDir + "/artifact";
 		var localCacheMavenDir = localCacheVersionDir + "/maven";
 		async.waterfall([
+
 			function(callback) {
 				var req = request(pomUrl);
 				req.on("response", function(resp) {
@@ -393,7 +405,8 @@ exports.haven = new function() {
 						returnDependencyNotFoundError(name, version, callback);
 					}
 				});
-			}, function(callback) {
+			},
+			function(callback) {
 				var req = request(jarUrl);
 				req.on("response", function(resp) {
 					if (resp.statusCode === 200) {
@@ -405,7 +418,8 @@ exports.haven = new function() {
 						returnDependencyNotFoundError(name, version, callback);
 					}
 				});
-			}, function(callback) {
+			},
+			function(callback) {
 				var zip = new AdmZip(localCacheMavenDir + "/artifact.jar");
 				var zipEntries = zip.getEntries();
 				var normalizedVersion = version;
@@ -421,7 +435,8 @@ exports.haven = new function() {
 					}
 				});
 				callback();
-			}, function(callback) {
+			},
+			function(callback) {
 				var havenConfig = {
 					"name": name,
 					"version": version
@@ -436,6 +451,35 @@ exports.haven = new function() {
 				});
 			}
 		], callback);
+	}
+
+	function loadBowerArtifact(url, name, version, scope, includes, excludes, callback) {
+		bower.lookup(name, function(err, result) {
+			if (result) {
+				var ghurl = result.url;
+				var ghdata = gh(ghurl);
+				var localCache = loadHavenConfig().local_cache;
+				var localCachePackageDir = localCache + "/" + name;
+				var localCacheVersionDir = localCachePackageDir + "/" + version;
+				var localCacheArtifactDir = localCacheVersionDir + "/artifact";
+				ghdownload(ghdata.user + "/" + ghdata.repo + "#" + version, localCacheArtifactDir, function(err) {
+					if (err) {
+						callback(err);
+					} else {
+						var havenConfig = {
+							"name": name,
+							"version": version
+						}
+						// TODO Extract bower dependencies from bower.json and add to haven.json
+						fs.writeFile(localCacheVersionDir + "/haven.json", JSON.stringify(havenConfig), function(err) {
+							loadLocalArtifact(loadHavenConfig().local_cache, name, version, scope, includes, excludes, callback);
+						});
+					}
+				});
+			} else {
+				returnDependencyNotFoundError(name, version, callback);
+			}
+		});
 	}
 
 	function loadHavenConfig() {
