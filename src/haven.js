@@ -45,8 +45,23 @@ exports.haven = new function() {
 		}
 	};
 
+    function checkConfig(config){
+        if(!/\-SNAPSHOT$/.test(config.version)){
+            for(var i in config.dependencies){
+                var dependency = config.dependencies[i];
+                if(/\-SNAPSHOT$/.test(dependency.version)){
+                    var e = new Error();
+                    e.code = "SnapshotDependencyException";
+                    e.message = "Snapshot dependency found: " + dependency.name + " v." + dependency.version;
+                    throw e;
+                }
+            }
+        }
+    }
+    
 	this.install = function() {
 		var packageConfig = loadPackageConfig();
+        checkConfig(packageConfig);
 		var packageName = packageConfig.name;
 		var packageVersion = packageConfig.version;
 		var artifacts = packageConfig.artifacts;
@@ -84,6 +99,11 @@ exports.haven = new function() {
 
 	this.deploy = function(callback) {
 		var packageConfig = loadPackageConfig();
+        try{
+            checkConfig(packageConfig);
+        }catch(e){
+            callback(e);
+        }
 		var packageName = packageConfig.name;
 		var packageVersion = packageConfig.version;
 		var artifacts = packageConfig.artifacts;

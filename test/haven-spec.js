@@ -31,6 +31,15 @@ describe("Haven", function() {
 		 	expect(fs.existsSync(havenCachePath + "haven-test-artifact-2/0.1.0/artifact/test.txt")).toBe(true);
 		 	expect(fs.existsSync(havenCachePath + "haven-test-artifact-2-other/0.1.0/artifact/test2.txt")).toBe(true);
 		});
+        it("should not allow releases with snapshot dependencies", function() {
+		 	process.chdir("test-artifact-with-snapshot-dependencies");
+            try{
+                haven.install();
+                expect(1).toBe(2); // Should never be called - no fail() method
+            }catch(e){
+                expect(e.code).toBe("SnapshotDependencyException");
+            }
+		});
 	});
 
 	describe("#deploy", function() {
