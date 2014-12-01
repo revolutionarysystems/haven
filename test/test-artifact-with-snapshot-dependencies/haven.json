@@ -1,0 +1,10 @@
+{
+	"name": "haven-test-artifact-with-maven-dependencies",
+	"version": "0.1.0",
+	"dependencies": [
+		{
+			"name": "zzzyyyxxx",
+			"version": "9.8.7-SNAPSHOT"
+		}
+	]
+}

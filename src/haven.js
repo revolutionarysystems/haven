@@ -11,19 +11,17 @@ var ghdownload = require('download-github-repo')
 
 exports.haven = new function() {
 
-	console.log("Running Haven");
-
 	var _havenConfig;
 
 	this.getConfig = function() {
 		return loadHavenConfig();
 	}
 
-	this.run = function(method, callback) {
+	this.run = function(method, args, callback) {
 		if (callback == null) {
 			callback = function(err) {
 				if (err != null) {
-					console.log(err.message);
+					throw err.message;
 				}
 			};
 		}
@@ -40,12 +38,17 @@ exports.haven = new function() {
 			this.clean();
 		} else if (method === "clean-cache") {
 			this.cleanCache();
+		} else if (method === "check-config") {
+			this.checkConfig();
+		} else if (method === "set-version") {
+			this.setVersion(args);
 		} else {
-			console.log("Command not found: " + method);
+			throw "Command not found: " + method;
 		}
 	};
 
-    function checkConfig(config){
+    this.checkConfig = function(){
+        var config = loadPackageConfig();
         if(!/\-SNAPSHOT$/.test(config.version)){
             for(var i in config.dependencies){
                 var dependency = config.dependencies[i];
@@ -59,9 +62,15 @@ exports.haven = new function() {
         }
     }
     
+    this.setVersion = function(version){
+        var packageConfig = loadPackageConfig();
+        packageConfig.version = version;
+        savePackageConfig(packageConfig);
+    }
+    
 	this.install = function() {
 		var packageConfig = loadPackageConfig();
-        checkConfig(packageConfig);
+        this.checkConfig();
 		var packageName = packageConfig.name;
 		var packageVersion = packageConfig.version;
 		var artifacts = packageConfig.artifacts;
@@ -100,7 +109,7 @@ exports.haven = new function() {
 	this.deploy = function(callback) {
 		var packageConfig = loadPackageConfig();
         try{
-            checkConfig(packageConfig);
+            this.checkConfig();
         }catch(e){
             callback(e);
         }
@@ -516,6 +525,10 @@ exports.haven = new function() {
 	function loadPackageConfig() {
 		var _packageConfig = loadJSONFromFile("haven.json");
 		return _packageConfig;
+	}
+    
+    function savePackageConfig(config) {
+		fs.writeFileSync("haven.json", JSON.stringify(config));
 	}
 
 	function loadJSONFromFile(path) {
