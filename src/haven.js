@@ -47,30 +47,30 @@ exports.haven = new function() {
 		}
 	};
 
-    this.checkConfig = function(){
-        var config = loadPackageConfig();
-        if(!/\-SNAPSHOT$/.test(config.version)){
-            for(var i in config.dependencies){
-                var dependency = config.dependencies[i];
-                if(/\-SNAPSHOT$/.test(dependency.version)){
-                    var e = new Error();
-                    e.code = "SnapshotDependencyException";
-                    e.message = "Snapshot dependency found: " + dependency.name + " v." + dependency.version;
-                    throw e;
-                }
-            }
-        }
-    }
-    
-    this.setVersion = function(version){
-        var packageConfig = loadPackageConfig();
-        packageConfig.version = version;
-        savePackageConfig(packageConfig);
-    }
-    
+	this.checkConfig = function() {
+		var config = loadPackageConfig();
+		if (!/\-SNAPSHOT$/.test(config.version)) {
+			for (var i in config.dependencies) {
+				var dependency = config.dependencies[i];
+				if (/\-SNAPSHOT$/.test(dependency.version)) {
+					var e = new Error();
+					e.code = "SnapshotDependencyException";
+					e.message = "Snapshot dependency found: " + dependency.name + " v." + dependency.version;
+					throw e;
+				}
+			}
+		}
+	}
+
+	this.setVersion = function(version) {
+		var packageConfig = loadPackageConfig();
+		packageConfig.version = version;
+		savePackageConfig(packageConfig);
+	}
+
 	this.install = function() {
 		var packageConfig = loadPackageConfig();
-        this.checkConfig();
+		this.checkConfig();
 		var packageName = packageConfig.name;
 		var packageVersion = packageConfig.version;
 		var artifacts = packageConfig.artifacts;
@@ -108,11 +108,11 @@ exports.haven = new function() {
 
 	this.deploy = function(callback) {
 		var packageConfig = loadPackageConfig();
-        try{
-            this.checkConfig();
-        }catch(e){
-            callback(e);
-        }
+		try {
+			this.checkConfig();
+		} catch (e) {
+			callback(e);
+		}
 		var packageName = packageConfig.name;
 		var packageVersion = packageConfig.version;
 		var artifacts = packageConfig.artifacts;
@@ -491,18 +491,30 @@ exports.haven = new function() {
 				var localCachePackageDir = localCache + "/" + name;
 				var localCacheVersionDir = localCachePackageDir + "/" + version;
 				var localCacheArtifactDir = localCacheVersionDir + "/artifact";
-				ghdownload(ghdata.user + "/" + ghdata.repo + "#" + version, localCacheArtifactDir, function(err) {
-					if (err) {
-						callback(err);
-					} else {
-						var havenConfig = {
+				var handleDownload = function(callback) {
+					var havenConfig = {
 							"name": name,
 							"version": version
 						}
 						// TODO Extract bower dependencies from bower.json and add to haven.json
-						fs.writeFile(localCacheVersionDir + "/haven.json", JSON.stringify(havenConfig), function(err) {
-							loadLocalArtifact(loadHavenConfig().local_cache, name, version, scope, includes, excludes, callback);
-						});
+					fs.writeFile(localCacheVersionDir + "/haven.json", JSON.stringify(havenConfig), function(err) {
+						loadLocalArtifact(loadHavenConfig().local_cache, name, version, scope, includes, excludes, callback);
+					});
+				};
+				ghdownload(ghdata.user + "/" + ghdata.repo + "#" + version, localCacheArtifactDir, function(err) {
+					if (err) {
+						if (err == 404) {
+							ghdownload(ghdata.user + "/" + ghdata.repo + "#v" + version, localCacheArtifactDir, function(err) {
+								if (err) {
+									callback(err);
+								} else {
+									handleDownload(callback);
+								}
+							});
+						}
+						callback(err);
+					} else {
+						handleDownload(callback);
 					}
 				});
 			} else {
@@ -526,8 +538,8 @@ exports.haven = new function() {
 		var _packageConfig = loadJSONFromFile("haven.json");
 		return _packageConfig;
 	}
-    
-    function savePackageConfig(config) {
+
+	function savePackageConfig(config) {
 		fs.writeFileSync("haven.json", JSON.stringify(config));
 	}
 
