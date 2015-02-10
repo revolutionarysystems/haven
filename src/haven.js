@@ -116,8 +116,7 @@ exports.haven = new function() {
 		var packageName = packageConfig.name;
 		var packageVersion = packageConfig.version;
 		var artifacts = packageConfig.artifacts;
-		for (var a in artifacts) {
-			var artifact = artifacts[a];
+		async.eachSeries(artifacts, function(artifact, callback) {
 			var artifactId = artifact.id;
 			var thisPackageName = packageName;
 			if (artifactId != null) {
@@ -148,7 +147,9 @@ exports.haven = new function() {
 				var form = r.form();
 				form.append('my_file', fs.createReadStream("haven.json"));
 			});
-		}
+		}, function(err){
+			callback(err);
+		});
 	}
 
 	this.update = function(callback) {
