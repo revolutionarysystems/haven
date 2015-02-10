@@ -506,13 +506,18 @@ exports.haven = new function() {
 						if (err == 404) {
 							ghdownload(ghdata.user + "/" + ghdata.repo + "#v" + version, localCacheArtifactDir, function(err) {
 								if (err) {
-									callback(err);
+									if (err == 404) {
+										returnDependencyNotFoundError(name, version, callback);
+									} else {
+										callback(err);
+									}
 								} else {
 									handleDownload(callback);
 								}
 							});
+						} else {
+							callback(err);
 						}
-						callback(err);
 					} else {
 						handleDownload(callback);
 					}
