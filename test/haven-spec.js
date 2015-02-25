@@ -40,6 +40,23 @@ describe("Haven", function() {
                 expect(e.code).toBe("SnapshotDependencyException");
             }
 		});
+		it("should install artifact sub modules to the local cache", function() {
+			process.chdir("test-artifact-with-submodules/module1");
+		 	haven.cleanCache();
+		 	haven.install();
+		 	expect(fs.existsSync(havenCachePath + "haven-test-artifact-module1/0.1.0/haven.json")).toBe(true);
+		 	expect(fs.existsSync(havenCachePath + "haven-test-artifact-module1/0.1.0/artifact/test.txt")).toBe(true);
+		 	expect(fs.readFileSync(havenCachePath + "haven-test-artifact-module1/0.1.0/artifact/test.txt", "utf-8")).toBe("This is a test");
+		 });
+		it("should not allow releases with snapshot dependencies in sub modules", function() {
+		 	process.chdir("test-artifact-with-submodules");
+            try{
+                haven.install();
+                expect(1).toBe(2); // Should never be called - no fail() method
+            }catch(e){
+                expect(e.code).toBe("SnapshotDependencyException");
+            }
+		});
 	});
 
 	describe("#deploy", function() {

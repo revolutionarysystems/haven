@@ -1,0 +1,9 @@
+{
+	"name": "haven-test-artifact-module1",
+	"master": "../haven.json",
+	"artifacts": [{
+			"files": [
+				"test.txt"
+			]}
+	]
+}

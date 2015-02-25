@@ -1,0 +1,16 @@
+{
+	"name": "haven-test-artifact-master",
+	"version": "0.1.0",
+	"isMaster": true,
+	"modules": [
+		"module1",
+		"module2"
+	],
+	"repositories": {
+		"distribution": [
+			{
+				"url": "http://localhost:8080/haven-repository"
+			}
+		]
+	}
+}

@@ -7,7 +7,8 @@ var parser = require('xml2js');
 var BowerClient = require('bower-registry-client');
 var bower = new BowerClient({});
 var gh = require('github-url-to-object')
-var ghdownload = require('download-github-repo')
+var ghdownload = require('download-github-repo');
+var merge = require('merge');
 
 exports.haven = new function() {
 
@@ -49,6 +50,19 @@ exports.haven = new function() {
 
 	this.checkConfig = function() {
 		var config = loadPackageConfig();
+		if(config.isMaster == true){
+			for(var i in config.modules){
+				var module = config.modules[i];
+				process.chdir(module);
+				try{
+				this.checkConfig();
+				}catch(e){
+					process.chdir("..");
+					throw e;
+				}
+				process.chdir("..");
+			}
+		}
 		if (!/\-SNAPSHOT$/.test(config.version)) {
 			for (var i in config.dependencies) {
 				var dependency = config.dependencies[i];
@@ -542,6 +556,11 @@ exports.haven = new function() {
 
 	function loadPackageConfig() {
 		var _packageConfig = loadJSONFromFile("haven.json");
+		if(_packageConfig.master){
+			_masterPackageConfig = loadJSONFromFile(_packageConfig.master);
+			_packageConfig = merge(_masterPackageConfig, _packageConfig);
+			_packageConfig.isMaster = false;
+		}
 		return _packageConfig;
 	}
 

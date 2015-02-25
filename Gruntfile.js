@@ -1,7 +1,8 @@
 module.exports = function(grunt) {
 	grunt.initConfig({
 		jasmine_node: {
-			matchall: true, // load only specs containing specNameMatcher
+			matchall: false, // load only specs containing specNameMatcher
+			specNameMatcher: "haven-spec",
 			projectRoot: ".",
 			requirejs: false,
 			forceExit: true,
